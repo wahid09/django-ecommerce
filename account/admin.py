@@ -13,6 +13,8 @@ class AccountAdmin(UserAdmin):
     filter_horizontal = ()
     list_filter = ()
     fieldsets = ()
+    list_editable = ('is_active',)
+    list_filter=('last_login', 'date_joined', 'is_active')
 
 
 admin.site.register(Account, AccountAdmin)

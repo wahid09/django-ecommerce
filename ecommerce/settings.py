@@ -139,3 +139,14 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
+
+LOGIN_URL = '/account/login'
+
+
+# SMTP COnfiguration
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'spksbd5@gmail.com'
+EMAIL_HOST_PASSWORD='wfmlfqwcamfocuhg'
+EMAIL_USE_TLS = True
