@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Cart{% endblock %}
+{% block body_block %}
+
+<section class="section-content padding-y bg">
+    <div class="container">
+
+        <div class="row">
+            <main class="col-md-8">
+                <article class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Review cart</h4>
+                        <div class="row">
+                            {% for item in cart_items %}
+                            <div class="col-md-6">
+                                <figure class="itemside  mb-4">
+                                    <div class="aside"><img src="{{ item.product.images.url }}" class="border img-sm">
+                                    </div>
+                                    <figcaption class="info">
+                                        <p>{{ item.product.product_name }} </p>
+                                        <span class="text-muted">{{item.quantity}}x = ${{ item.sub_total }} </span>
+                                    </figcaption>
+                                </figure>
+                            </div> <!-- col.// -->
+                            {% endfor %}
+                        </div> <!-- row.// -->
+                    </div> <!-- card-body.// -->
+                </article> <!-- card.// -->
+
+                <article class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Billing Address</h4>
+                        <form action="{% url 'order:place_order' %}" method="POST">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="form-group col-sm-6">
+                                    <label>First name</label>
+                                    <input type="text" name="first_name" placeholder="Type here" class="form-control">
+                                </div>
+                                <div class="form-group col-sm-6">
+                                    <label>Last name</label>
+                                    <input type="text" name="last_name" placeholder="Type here" class="form-control">
+                                </div>
+                                <div class="form-group col-sm-6">
+                                    <label>Phone</label>
+                                    <input type="text" name="phone_number" value="+880" class="form-control">
+                                </div>
+                                <div class="form-group col-sm-6">
+                                    <label>Email</label>
+                                    <input type="email" name="email" placeholder="example@gmail.com"
+                                           class="form-control">
+                                </div>
+                                <div class="form-group col-sm-6">
+                                    <label>Address Line 1</label>
+                                    <input type="text" name="address_line_1" placeholder="type here"
+                                           class="form-control">
+                                </div>
+                                <div class="form-group col-sm-6">
+                                    <label>Address Line 2</label>
+                                    <input type="text" name="address_line_2" placeholder="type here"
+                                           class="form-control">
+                                </div>
+                                <div class="form-group col-sm-4">
+                                    <label>City</label>
+                                    <input type="text" name="city" placeholder="type here" class="form-control">
+                                </div>
+                                <div class="form-group col-sm-4">
+                                    <label>State</label>
+                                    <input type="text" name="state" placeholder="type here" class="form-control">
+                                </div>
+                                <div class="form-group col-sm-4">
+                                    <label>Country</label>
+                                    <input type="text" name="country" placeholder="type here" class="form-control">
+                                </div>
+                                <div class="form-group col-sm-12">
+                                    <label>Order Note</label>
+                                    <textarea name="order_note" class="form-control"></textarea>
+                                </div>
+                            </div> <!-- row.// -->
+
+                    </div> <!-- card-body.// -->
+                </article> <!-- card.// -->
+                <!-- accordion end.// -->
+
+            </main> <!-- col.// -->
+
+            <aside class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <dl class="dlist-align">
+                            <dt>Total price:</dt>
+                            <dd class="text-right">${{total}}</dd>
+                        </dl>
+                        <dl class="dlist-align">
+                            <dt>Tax:</dt>
+                            <dd class="text-right"> ${{tax}}</dd>
+                        </dl>
+                        <dl class="dlist-align">
+                            <dt>Total:</dt>
+                            <dd class="text-right text-dark b"><strong>${{grand_total}}</strong></dd>
+                        </dl>
+                        <hr>
+                        <p class="text-center mb-3">
+                            <!--<img src="./images/misc/payments.png" height="26">-->
+                        </p>
+                        <!--<a href="{% url 'order:place_order' %}" class="btn btn-primary btn-block"> Place Order </a>-->
+                        <input type="submit" value="Place Order" class="btn btn-primary btn-block">
+                        <a href="{% url 'store:store'%}" class="btn btn-default btn-block"> Continue shopping </a>
+
+                    </div> <!-- card-body.// -->
+                </div> <!-- card.// -->
+            </aside> <!-- col.// -->
+</form>
+        </div>
+
+    </div> <!-- container .//  -->
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->
+{% endblock %}

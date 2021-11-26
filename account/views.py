@@ -14,6 +14,10 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
+## Cart
+from cart.models import Cart, CartItem
+from cart.views import _cart_id
+
 
 # Create your views here.
 
@@ -29,7 +33,8 @@ def get_register(request):
             password = form.cleaned_data['password']
             username = email.split("@")[0]
 
-            user = Account.objects.create_user(first_name=first_name, last_name=last_name, email=email, username=username, password=password)
+            user = Account.objects.create_user(first_name=first_name, last_name=last_name, email=email,
+                                               username=username, password=password)
 
             user.phone_number = phone_number
 
@@ -48,7 +53,8 @@ def get_register(request):
             send_email = EmailMessage(mail_subject, message, to=[to_email])
             send_email.send()
 
-            messages.success(request, f"Thank you for registering with us, We have sent you a verification email to your email address. Please verify it")
+            messages.success(request,
+                             f"Thank you for registering with us, We have sent you a verification email to your email address. Please verify it")
             return redirect('account:login')
         else:
             messages.error(request, 'Something went wrong!')
@@ -72,8 +78,44 @@ def get_login(request):
             user = auth.authenticate(email=email, password=password)
 
             if user is not None:
+                try:
+                    cart = Cart.objects.get(cart_id=_cart_id(request))
+                    is_cart_item_exist = CartItem.objects.filter(cart=cart).exists()
+
+                    if is_cart_item_exist:
+                        cart_item = CartItem.objects.filter(cart=cart)
+                        # geting the product variation by cart id
+                        product_variation = []
+                        for item in cart_item:
+                            variation = item.variations.all()
+                            product_variation.append(list(variation))
+
+                        # getting the cart item by user and product variation
+                        cart_item = CartItem.objects.filter(user=user)
+                        ex_var_list = []
+                        id = []
+                        for item in cart_item:
+                            existing_variation = item.variations.all()
+                            ex_var_list.append(list(existing_variation))
+                            id.append(item.id)
+
+                        for pr in product_variation:
+                            if pr in ex_var_list:
+                                index=ex_var_list.index(pr)
+                                item_id = id[index]
+                                item=CartItem.objects.get(id=item_id)
+                                item.quantity += 1
+                                item.user = user
+                                item.save()
+                            else:
+                                cart_item = CartItem.objects.filter(cart=cart)
+                                for item in cart_item:
+                                    item.user = user
+                                    item.save()
+                except:
+                    pass
                 auth.login(request, user)
-                #messages.success(request, 'You are now logged in.')
+                # messages.success(request, 'You are now logged in.')
                 return redirect('account:dashboard')
             else:
                 messages.error(request, 'Invalid Login credentials')
@@ -86,6 +128,7 @@ def get_logout(request):
     logout(request)
     messages.info(request, 'You are now loggout.')
     return HttpResponseRedirect(reverse('account:login'))
+
 
 def activate(request, uidb64, token):
     try:
@@ -103,9 +146,11 @@ def activate(request, uidb64, token):
         messages.error(request, f"Invalid activation link")
         return redirect('account:register')
 
+
 @login_required
 def dashboard(request):
     return render(request, 'account/dashboard.html')
+
 
 def forgot_password(request):
     if request.method == 'POST':
@@ -151,6 +196,7 @@ def reset_password_validate(request, uidb64, token):
         messages.error(request, f"This link has been expired!")
         return redirect('account:forgot_password')
 
+
 def reset_password(request):
     if request.method == 'POST':
         password = request.POST['password']
@@ -169,4 +215,3 @@ def reset_password(request):
             return redirect('account:reset_password')
     else:
         return render(request, 'account/reset_password.html')
-
