@@ -2,11 +2,14 @@ from django.shortcuts import render, redirect, HttpResponseRedirect
 from cart.models import CartItem
 from .forms import OrderForm
 from .models import Order, Payment, OrderProduct
+from store.models import Product, Variation
 import datetime
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
 
 # for payment
 
@@ -29,7 +32,7 @@ def place_order(request, total=0, quantity=0):
     tax = 0
 
     for cart_item in cart_items:
-        total = (cart_item.product.price * cart_item.quantity)
+        total += (cart_item.product.price * cart_item.quantity)
         quantity += cart_item.quantity
     tax = (4*total)/100
     grant_total = total + tax
@@ -49,8 +52,9 @@ def place_order(request, total=0, quantity=0):
             data.state = form.cleaned_data['state']
             data.city = form.cleaned_data['city']
             data.order_note = form.cleaned_data['order_note']
-            data.order_total = grant_total
+            data.order_total = total
             data.tax = tax
+            data.grant_total = grant_total
             data.ip = request.META.get('REMOTE_ADDR')
             data.save()
 
@@ -93,9 +97,10 @@ def payment(request, total=0, quantity=0):
     tax = 0
 
     for cart_item in cart_items:
-        total = (cart_item.product.price * cart_item.quantity)
+        total += (cart_item.product.price * cart_item.quantity)
         quantity += cart_item.quantity
     tax = (4 * total) / 100
+    #print(total)
     grant_total = total + tax
     order = Order.objects.filter(user=current_user, is_ordered=False)
     order = order[0]
@@ -121,7 +126,7 @@ def make_payment(request, total=0, quantity=0):
     tax = 0
 
     for cart_item in cart_items:
-        total = (cart_item.product.price * cart_item.quantity)
+        total += (cart_item.product.price * cart_item.quantity)
         quantity += cart_item.quantity
     tax = (4 * total) / 100
     grant_total = total + tax
@@ -166,9 +171,10 @@ def make_payment(request, total=0, quantity=0):
 def complete(request):
     if request.method == "POST" or request.method == "post":
         payment_data = request.POST
+        #print(payment_data)
         status = payment_data['status']
-        tran_id = payment_data['tran_id']
-        store_amount = payment_data['store_amount']
+        tran_id = payment_data['val_id']
+        store_amount = payment_data['amount']
         card_type = payment_data['card_type']
         # order = Order.objects.filter(user=request.user, is_ordered=False)
 
@@ -224,7 +230,55 @@ def purchase(request, tran_id, card_type, store_amount, status):
         order_product.product_price = item.product.price
         order_product.ordered = True
         order_product.save()
-    return HttpResponseRedirect(reverse('home'))
+
+        #set variation
+        cart_item = CartItem.objects.get(id=item.id)
+        product_variations = cart_item.variations.all()
+        order_product = OrderProduct.objects.get(id=order_product.id)
+        order_product.variation.set(product_variations)
+        order_product.save()
+
+        # reduce store
+        product = Product.objects.get(id=item.product_id)
+        product.stock -= item.quantity
+        product.save()
+
+        # email send
+        #current_sit = get_current_site(request)
+        mail_subject = "Thank you for your order!"
+        message = render_to_string('order/order_received_email.html', {
+            'user': request.user,
+            'order': order
+        })
+        to_email = request.user.email
+        send_email = EmailMessage(mail_subject, message, to=[to_email])
+        send_email.send()
+
+    #Clear cart
+    CartItem.objects.filter(user=request.user).delete()
+
+    return HttpResponseRedirect(reverse('order:order_complete', kwargs={'order_number': order.order_number}))
+
+    #return render(request, 'order/order_complete_page.html')
+
+
+@login_required
+def order_complete(request, order_number):
+    order = Order.objects.filter(user=request.user, order_number=order_number, is_ordered=True)
+    order = order[0]
+    payment = Payment.objects.filter(payment_id=order.payment, user=request.user)
+    payment = payment[0]
+    order_product = OrderProduct.objects.filter(user=request.user, payment_id=order.payment)
+    #print(order_product)
+    #for item in order_product:
+
+    context = {
+        'order_number': order_number,
+        'order': order,
+        'payment': payment,
+        'order_product': order_product
+    }
+    return render(request, 'order/order_complete_page.html', context)
 
 
 

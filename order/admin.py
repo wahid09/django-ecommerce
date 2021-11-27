@@ -20,6 +20,24 @@ class OrderAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Order, OrderAdmin)
-admin.site.register(OrderProduct)
-admin.site.register(Payment)
+
+
+class OrderProductAdmin(admin.ModelAdmin):
+    list_display = ['payment', 'product', 'quantity', 'product_price', 'ordered', 'created_at']
+    list_filter = ['ordered', 'created_at']
+    search_fields = ['product', 'product_price', 'created_at']
+    list_per_page = 20
+
+
+admin.site.register(OrderProduct, OrderProductAdmin)
+
+
+class PamentAdmin(admin.ModelAdmin):
+    list_display = ['payment_id', 'payment_method', 'amount_paid', 'status', 'created_at']
+    list_filter = ['status', 'created_at']
+    search_fields = ['payment_method', 'amount_paid', 'payment_id']
+    list_per_page = 20
+
+
+admin.site.register(Payment, PamentAdmin)
 

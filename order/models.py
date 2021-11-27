@@ -40,6 +40,7 @@ class Order(models.Model):
     order_note = models.TextField(max_length=500, blank=True)
     order_total = models.FloatField()
     tax = models.FloatField()
+    grant_total = models.FloatField(default=1.00)
     status = models.CharField(max_length=10, choices=STATUS, default='New')
     ip = models.CharField(max_length=20, blank=True)
     is_ordered = models.BooleanField(default=False)
@@ -67,6 +68,9 @@ class OrderProduct(models.Model):
     ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def total_price(self):
+        return self.quantity * self.product_price
 
     def __str__(self):
         return self.product.product_name
