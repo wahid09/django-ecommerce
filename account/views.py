@@ -259,7 +259,7 @@ class MyOrderListView(ListView):
 
         context['orders'] = orders
         return context
-
+@login_required
 def edit_profile(request):
     user_profile = get_object_or_404(UserProfile, user=request.user)
     if request.method == 'POST':
@@ -281,5 +281,30 @@ def edit_profile(request):
     }
 
     return render(request, 'account/edit_profile.html', context)
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        curret_password = request.POST['current_password']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['confirm_password']
+
+        user = Account.objects.get(username__exact=request.user.username)
+
+        if new_password == confirm_password:
+            success = user.check_password(curret_password)
+            if success:
+                user.set_password(new_password)
+                user.save()
+                #auth.logout(request)
+                messages.success(request, f'Password updated successfully')
+                return redirect('account:login')
+            else:
+                messages.error(request, f'Please enter valid old password')
+                return redirect('account:change_password')
+        else:
+            messages.error(request, f'Password does not match!')
+            return redirect('account:change_password')
+    return render(request, 'account/change_password.html')
 
 
