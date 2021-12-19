@@ -53,6 +53,7 @@ def product_detail(request, category_slug=None, product_slug=None):
         order_product = None
 
     reviews = ReviewRating.objects.filter(product_id=single_product.id, status=True)
+    # print(single_product.variation_set.colors)
 
     context = {
         'single_product': single_product,

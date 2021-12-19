@@ -22,6 +22,7 @@
                         <article class="content-body">
 
                             <h2 class="title">{{ single_product.product_name }}</h2>
+                            {% if single_product.avarageReview > 0 %}
                             <p class="rating-star"><span>Avarage Rating:</span>
                                             <i class="fa fa-star{% if single_product.avarageReview < 0.5 %}-alt{% elif single_product.avarageReview >= 0.5 and single_product.avarageReview < 1 %}-half-alt {% endif %}" aria-hidden="true"></i>
                                             <i class="fa fa-star{% if single_product.avarageReview < 1.5 %}-alt{% elif single_product.avarageReview >= 1.5 and single_product.avarageReview < 2 %}-half-alt {% endif %}" aria-hidden="true"></i>
@@ -29,6 +30,7 @@
                                             <i class="fa fa-star{% if single_product.avarageReview < 3.5 %}-alt{% elif single_product.avarageReview >= 3.5 and single_product.avarageReview < 4 %}-half-alt {% endif %}" aria-hidden="true"></i>
                                             <i class="fa fa-star{% if single_product.avarageReview < 4.5 %}-alt{% elif single_product.avarageReview >= 4.5 and single_product.avarageReview < 5 %}-half-alt {% endif %}" aria-hidden="true"></i>
                                         </p>
+                            {% endif %}
                             <p><span>Catrgory:</span> {{single_product.category.category_name}}</p>
 
                             <div class="mb-3">
@@ -45,8 +47,7 @@
                                     <select name="color" class="form-control" required>
                                         <option value="" disabled selected>--select color--</option>
                                         {% for variation in single_product.variation_set.colors %}
-                                        <option value="{{ variation.variation_value | lower }}">{{ variation.variation_value|capfirst
-                                            }}
+                                        <option value="{{ variation.variation_value | lower }}">{{ variation.variation_value|capfirst }}
                                         </option>
                                         {% endfor %}
                                     </select>
@@ -58,8 +59,7 @@
                                     <select name="size" class="form-control" required>
                                         <option value="" disabled selected>--select size--</option>
                                         {% for variation in single_product.variation_set.sizes %}
-                                        <option value="{{ variation.variation_value | lower }}">{{ variation.variation_value|capfirst
-                                            }}
+                                        <option value="{{ variation.variation_value | lower }}">{{ variation.variation_value|capfirst }}
                                         </option>
                                         {% endfor %}
                                     </select>

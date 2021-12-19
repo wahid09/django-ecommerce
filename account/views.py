@@ -1,7 +1,7 @@
-from django.shortcuts import render, redirect, HttpResponseRedirect
+from django.shortcuts import render, redirect, HttpResponseRedirect, get_object_or_404
 from django.http import HttpResponse
-from .forms import RegistrationFrom
-from .models import Account
+from .forms import RegistrationFrom, UserForm, UserProfileForm
+from .models import Account, UserProfile
 from django.contrib import messages, auth
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
@@ -17,6 +17,11 @@ from django.core.mail import EmailMessage
 ## Cart
 from cart.models import Cart, CartItem
 from cart.views import _cart_id
+from order.models import Order
+from django.core.paginator import Paginator
+from django.views.generic import ListView
+from django.core.paginator import EmptyPage
+from django.core.paginator import PageNotAnInteger
 
 
 # Create your views here.
@@ -149,7 +154,12 @@ def activate(request, uidb64, token):
 
 @login_required
 def dashboard(request):
-    return render(request, 'account/dashboard.html')
+    orders = Order.objects.order_by('-created_at').filter(user_id = request.user.id, is_ordered=True)
+    order_count = orders.count()
+    context = {
+        'order_count': order_count,
+    }
+    return render(request, 'account/dashboard.html', context)
 
 
 def forgot_password(request):
@@ -215,3 +225,61 @@ def reset_password(request):
             return redirect('account:reset_password')
     else:
         return render(request, 'account/reset_password.html')
+
+
+def my_orders(request):
+    orders = Order.objects.order_by('-created_at').filter(user_id = request.user.id, is_ordered=True)
+    paginator = Paginator(orders, 5)  # Show 25 contacts per page.
+
+    page_number = request.GET.get('page')
+    orders = paginator.get_page(page_number)
+    context = {
+        'orders': orders,
+    }
+    return render(request, 'account/my_order.html', context)
+
+class MyOrderListView(ListView):
+    paginate_by = 5
+    model = Order
+    # context_object_name = 'orders'
+
+    def get_context_data(self, **kwargs):
+        context = super(MyOrderListView, self).get_context_data(**kwargs)
+        orders = Order.objects.order_by('-created_at').filter(user_id = self.request.user.id, is_ordered=True)
+        paginator = Paginator(orders, self.paginate_by)
+
+        page = self.request.GET.get('page')
+
+        try:
+            orders = paginator.page(page)
+        except PageNotAnInteger:
+            orders = paginator.page(1)
+        except EmptyPage:
+            orders = paginator.page(paginator.num_pages)
+
+        context['orders'] = orders
+        return context
+
+def edit_profile(request):
+    user_profile = get_object_or_404(UserProfile, user=request.user)
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance = request.user)
+        profile_form = UserProfileForm(request.POST, request.FILES, instance = user_profile)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+
+            messages.success(request, f"profile updated successfully")
+    else:
+        user_form = UserForm(instance=request.user)
+        profile_form = UserProfileForm(instance = user_profile)
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'user_profile': user_profile
+    }
+
+    return render(request, 'account/edit_profile.html', context)
+
+

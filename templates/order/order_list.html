@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Dashboard{% endblock %}
+{% block body_block %}
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-conten padding-y bg">
+
+    <div class="container">
+        <div class="row">
+            {% include 'partials/dashboard_include.html' %}
+            <main class="col-md-9">
+                <article class="card">
+                    <header class="card-header">
+                        <strong class="d-inline-block mr-3">Your Order List</strong>
+                        <!--<span>Order Date: 16 December 2018</span>-->
+                    </header>
+                    <!--<div class="card-body">-->
+                    <!--<div class="row">-->
+                    <!--<div class="col-md-8">-->
+                    <!--<h6 class="text-muted">Delivery to</h6>-->
+                    <!--<p>Michael Jackson <br>-->
+                    <!--Phone +1234567890 Email: myname@pixsellz.com <br>-->
+                    <!--Location: Home number, Building name, Street 123, Tashkent, UZB <br>-->
+                    <!--P.O. Box: 100123-->
+                    <!--</p>-->
+                    <!--</div>-->
+                    <!--<div class="col-md-4">-->
+                    <!--<h6 class="text-muted">Payment</h6>-->
+                    <!--<span class="text-success">-->
+                    <!--<i class="fab fa-lg fa-cc-visa"></i>-->
+                    <!--Visa  **** 4216-->
+                    <!--</span>-->
+                    <!--<p>Subtotal: $356 <br>-->
+                    <!--Shipping fee: $56 <br>-->
+                    <!--<span class="b">Total:  $456 </span>-->
+                    <!--</p>-->
+                    <!--</div>-->
+                    <!--</div> &lt;!&ndash; row.// &ndash;&gt;-->
+                    <!--</div> &lt;!&ndash; card-body .// &ndash;&gt;-->
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            {% for order in orders %}
+                            <tr>
+                                <th scope="row">
+                                    <p class="title mb-0">{{ order.order_number}}</p>
+                                </th>
+                                <td>{{ order.full_name}}</td>
+                                <td>{{ order.phone_number }}</td>
+                                <td>{{ order.order_total }}</td>
+                                <td>{{ order.status }}</td>
+                                <td>{{ order.created_at }}</td>
+                                <td><a href="#" class="btn btn-outline-primary">Track order</a> <a href="#"
+                                                                                                   class="btn btn-light">
+                                    Details </a></td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div> <!-- table-responsive .end// -->
+                    <div class="pagination">
+                        <span class="step-links">
+                            {% if orders.has_previous %}
+                                <a href="?page=1">&laquo; first</a>
+                                <a href="?page={{ orders.previous_page_number }}">previous</a>
+                            {% endif %}
+
+                            <span class="current">
+                                Page {{ orders.number }} of {{ orders.paginator.num_pages }}.
+                            </span>
+
+                            {% if orders.has_next %}
+                                <a href="?page={{ orders.next_page_number }}">next</a>
+                                <a href="?page={{ orders.paginator.num_pages }}">last &raquo;</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                </article> <!-- order-group.// -->
+            </main>
+        </div> <!-- row.// -->
+    </div>
+
+
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->
+{% endblock %}
