@@ -28,7 +28,11 @@
                             <div class="col-md-6">
                                 <div class="card text-center">
                                     <div class="card-body">
+                                        {% if user_profile %}
+                                        <img src="{{user_profile.profile_image.url}}" alt="image name" width="50" height="50" style="border-radius:50%">
+                                        {% else %}
                                         <img src="https://www.w3schools.com/howto/img_avatar.png" alt="image name" width="50" height="50" style="border-radius:50%">
+                                        {% endif %}
                                         <p class="mb-0"><strong>Email: </strong>{{ user.email }}</p>
                                         <p><strong>Phone: </strong>{{ user.phone_number }}</p>
                                     </div>

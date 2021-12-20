@@ -22,6 +22,7 @@ from django.core.paginator import Paginator
 from django.views.generic import ListView
 from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
+from order.models import OrderProduct, Order
 
 
 # Create your views here.
@@ -156,8 +157,10 @@ def activate(request, uidb64, token):
 def dashboard(request):
     orders = Order.objects.order_by('-created_at').filter(user_id = request.user.id, is_ordered=True)
     order_count = orders.count()
+    user_profile = UserProfile.objects.get(user_id=request.user.id)
     context = {
         'order_count': order_count,
+        'user_profile': user_profile,
     }
     return render(request, 'account/dashboard.html', context)
 
@@ -306,5 +309,21 @@ def change_password(request):
             messages.error(request, f'Password does not match!')
             return redirect('account:change_password')
     return render(request, 'account/change_password.html')
+
+@login_required
+def order_detail(request, order_id):
+    order_details = OrderProduct.objects.filter(order__order_number=order_id)
+    order = Order.objects.get(order_number=order_id)
+
+    total = 0
+    for i in order_details:
+        total += i.product_price * i.quantity
+
+    contex={
+        'order_details': order_details,
+        'order': order,
+        'total':total
+    }
+    return render(request, 'order/order_details.html', contex)
 
 

@@ -26,10 +26,28 @@
             {% for product in products %}
             <div class="col-md-3">
                 <div class="card card-product-grid">
-                    <a href="./product-detail.html" class="img-wrap"> <img src="{{ product.images.url }}"> </a>
+                    <a href="{{ product.get_url }}" class="img-wrap"> <img src="{{ product.images.url }}"> </a>
                     <figcaption class="info-wrap">
                         <a href="{{ product.get_url }}" class="title">{{ product.product_name}}</a>
                         <div class="price mt-1">${{ product.price }}</div> <!-- price-wrap.// -->
+                        {% if product.avarageReview > 0 %}
+                        <div class="rating-star">
+                            <i class="fa fa-star{% if product.avarageReview < 0.5 %}-alt{% elif product.avarageReview >= 0.5 and product.avarageReview < 1 %}-half-alt {% endif %}"
+                               aria-hidden="true"></i>
+                            <i class="fa fa-star{% if product.avarageReview < 1.5 %}-alt{% elif product.avarageReview >= 1.5 and product.avarageReview < 2 %}-half-alt {% endif %}"
+                               aria-hidden="true"></i>
+                            <i class="fa fa-star{% if product.avarageReview < 2.5 %}-alt{% elif product.avarageReview >= 2.5 and product.avarageReview < 3 %}-half-alt {% endif %}"
+                               aria-hidden="true"></i>
+                            <i class="fa fa-star{% if product.avarageReview < 3.5 %}-alt{% elif product.avarageReview >= 3.5 and product.avarageReview < 4 %}-half-alt {% endif %}"
+                               aria-hidden="true"></i>
+                            <i class="fa fa-star{% if product.avarageReview < 4.5 %}-alt{% elif product.avarageReview >= 4.5 and product.avarageReview < 5 %}-half-alt {% endif %}"
+                               aria-hidden="true"></i>
+                        </div>
+                        {% else %}
+                        <div class="rating-star">
+                            <!--<i class="fa fa-star-full-alt" aria-hidden="true"></i>-->
+                        </div>
+                        {% endif %}
                     </figcaption>
                 </div>
             </div> <!-- col.// -->
