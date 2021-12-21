@@ -1,3 +1,5 @@
 /.idea
-/product&category Images
-/env
+product&category Images/
+env/
+venv/
+.env/
